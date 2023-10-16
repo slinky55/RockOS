@@ -74,10 +74,10 @@ static uint64_t create_descriptor(uint32_t base, uint32_t limit, uint16_t flag) 
     descriptor |= base  << 16;                       // set base bits 15:0
     descriptor |= limit  & 0x0000FFFF;               // set limit bits 15:0
  
-    return descriptor
+    return descriptor;
 }
 
-struct GDTEntry gdt[6];
+struct GDTEntry gdt[5];
 
 void gdt_initialize() {
     uint64_t null_desc = create_descriptor(0, 0, 0);
@@ -87,11 +87,18 @@ void gdt_initialize() {
     uint64_t user_data_desc = create_descriptor(0, 0x000FFFFF, (GDT_DATA_PL3));
 
     memcpy(&gdt[0], &null_desc, sizeof(uint64_t));
-    memcpy(&gdt[0], &kernel_code_desc, sizeof(uint64_t));
-    memcpy(&gdt[0], &kernel_data_desc, sizeof(uint64_t));
-    memcpy(&gdt[0], &user_code_desc, sizeof(uint64_t));
-    memcpy(&gdt[0], &user_data_desc, sizeof(uint64_t));
+    memcpy(&gdt[1], &kernel_code_desc, sizeof(uint64_t));
+    memcpy(&gdt[2], &kernel_data_desc, sizeof(uint64_t));
+    memcpy(&gdt[3], &user_code_desc, sizeof(uint64_t));
+    memcpy(&gdt[4], &user_data_desc, sizeof(uint64_t));
 
-    // Load the GDT using assembly
+    struct {
+        uint16_t limit;
+        uint32_t base;
+    } gdt_ptr;
+
+    gdt_ptr.limit = sizeof(gdt) - 1;
+    gdt_ptr.base = (uint32_t)&gdt;
+
     asm volatile("lgdt %0" : : "m"(gdt_ptr));
 }
