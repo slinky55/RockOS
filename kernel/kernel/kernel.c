@@ -6,4 +6,6 @@
 void kernel_main(void) {
 	gdt_initialize();
 	terminal_initialize();
+
+	printf("Starting RockOS...");
 }

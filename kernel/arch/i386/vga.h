@@ -22,6 +22,10 @@ enum vga_color {
 	VGA_COLOR_WHITE = 15,
 };
 
+#define VGA_WIDTH 80
+#define VGA_HEIGHT 25
+#define VGA_MEMORY 0xC03FF000;
+
 static inline uint8_t vga_entry_color(enum vga_color fg, enum vga_color bg) {
 	return fg | bg << 4;
 }
