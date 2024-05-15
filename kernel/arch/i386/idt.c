@@ -1,14 +1,62 @@
 #include <arch/i386/idt.h>
+#include <arch/i386/pic.h>
+#include <arch/i386/isr.h>
+#include <stdio.h>
 
 __attribute__((aligned(0x10)))
 
-static idt_entry_t idt[256];
-static idtr_t idtr;
+idt_entry_t idt[MAX_IDT_ENTRIES];
+idtr_t idtr;
 
 extern void* isr_stub_table[];
 
-void default_isr_handler() {
-  puts("isr handler...");
+unsigned char *exception_msgs[] =
+{
+    "Division By Zero",
+    "Debug",
+    "Non Maskable Interrupt",
+    "Breakpoint",
+    "Into Detected Overflow",
+    "Out of Bounds",
+    "Invalid Opcode",
+    "No Coprocessor",
+
+    "Double Fault",
+    "Coprocessor Segment Overrun",
+    "Bad TSS",
+    "Segment Not Present",
+    "Stack Fault",
+    "General Protection Fault",
+    "Page Fault",
+    "Unknown Interrupt",
+
+    "Coprocessor Fault",
+    "Alignment Check",
+    "Machine Check",
+    "Reserved",
+    "Reserved",
+    "Reserved",
+    "Reserved",
+    "Reserved",
+
+    "Reserved",
+    "Reserved",
+    "Reserved",
+    "Reserved",
+    "Reserved",
+    "Reserved",
+    "Reserved",
+    "Reserved"
+};
+
+void default_isr_handler(isr_regs_t* regs) {
+  if (regs->int_no < 32) {
+    puts("exception!!!");
+    puts(exception_msgs[regs->int_no]);
+    puts("halting...");
+    asm("cli");
+    asm("hlt");
+  }
 }
 
 void set_idt_desc(uint8_t _v, void* _isr, uint8_t _flags) {
@@ -25,7 +73,7 @@ void init_idt() {
   puts("loading idt...");
 
   idtr.base = (uint32_t)&idt[0];
-  idtr.limit = sizeof(idt) - 1;
+  idtr.limit = MAX_IDT_ENTRIES * sizeof(idt_entry_t) - 1;
 
   // exceptions (0 - 31)
   for (uint8_t v = 0; v < 32; v++) {

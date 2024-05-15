@@ -28,4 +28,7 @@ void init_pic(uint8_t m_off, uint8_t s_off);
 
 void pic_eoi(uint8_t irq);
 
+void enable_irq(uint8_t irq);
+void disable_irq(uint8_t irq);
+
 #endif

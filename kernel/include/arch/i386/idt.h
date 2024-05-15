@@ -16,6 +16,7 @@ typedef struct {
   uint32_t base;
 } __attribute__((packed)) idtr_t;
 
+#define MAX_IDT_ENTRIES 256
 
 void init_idt();
 

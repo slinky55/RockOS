@@ -26,25 +26,9 @@ _start:
 
   cli
 
-  call terminal_initialize
-
-  call init_gdt
-
-  ljmp $0x08, $reload_seg
-
-reload_seg:
-  mov $0x10, %ax
-  mov %ax, %ds
-  mov %ax, %es 
-  mov %ax, %fs 
-  mov %ax, %gs 
-  mov %ax, %ss
-
-  call init_idt
+  call kernel_early
 
   sti
-
-  call kernel_early
 
   call kernel_main
 
@@ -52,3 +36,24 @@ reload_seg:
 1:	hlt
 	jmp 1b
 .size _start, . - _start
+
+
+.global load_gdt
+load_gdt:
+  lgdt [gdt_ptr]
+
+  push %eax   
+
+  mov $0x10, %ax
+  mov %ax, %ds
+  mov %ax, %es 
+  mov %ax, %fs 
+  mov %ax, %gs 
+  mov %ax, %ss
+  
+  ljmp $0x08, $flush_gdt
+
+flush_gdt:
+  pop %eax
+  ret
+

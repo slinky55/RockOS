@@ -1,71 +1,142 @@
 .global default_isr_handler
 
-.macro isr_err_stub num
+.macro isr_stub_err num
 isr_stub_\num:
-  pusha
-  call default_isr_handler
-  popa
-  iret
+  cli
+  push $\num
+  jmp isr_common
 .endm
 
-.macro isr_no_err_stub num
+.macro isr_stub_n_err num 
 isr_stub_\num:
-  pusha
-  call default_isr_handler
-  popa
-  iret
+  cli
+  push $0 
+  push $\num
+  jmp isr_common
 .endm
 
 .section .text
-isr_no_err_stub 0
-isr_no_err_stub 1
-isr_no_err_stub 2
-isr_no_err_stub 3
-isr_no_err_stub 4
-isr_no_err_stub 5
-isr_no_err_stub 6
-isr_no_err_stub 7
-isr_err_stub    8
-isr_no_err_stub 9
-isr_err_stub    10
-isr_err_stub    11
-isr_err_stub    12
-isr_err_stub    13
-isr_err_stub    14
-isr_no_err_stub 15
-isr_no_err_stub 16
-isr_err_stub    17
-isr_no_err_stub 18
-isr_no_err_stub 19
-isr_no_err_stub 20
-isr_no_err_stub 21
-isr_no_err_stub 22
-isr_no_err_stub 23
-isr_no_err_stub 24
-isr_no_err_stub 25
-isr_no_err_stub 26
-isr_no_err_stub 27
-isr_no_err_stub 28
-isr_no_err_stub 29
-isr_err_stub    30
-isr_no_err_stub 31
+isr_common:
+  pusha 
 
-isr_stub_32:
-  pusha
+  push %ds 
+  push %es 
+  push %fs 
+  push %gs 
+  
+  mov $0x10, %ax 
+  mov %ax, %ds 
+  mov %ax, %es 
+  mov %ax, %fs 
+  mov %ax, %gs
+
+  mov %esp, %eax 
+  push %eax 
+
   call default_isr_handler
-  mov $0x20, %al
-  out %al, $0x20
-  popa
-  iret 
 
-isr_stub_33:
-  pusha
-  call handle_keyboard
-  mov $0x20, %al
-  out %al, $0x20
+  pop %eax 
+  pop %gs
+  pop %fs 
+  pop %es 
+  pop %ds
+
   popa
+
+  add $0x08, %esp
+
+  iret
+  
+isr_stub_n_err 0
+isr_stub_n_err 1 
+isr_stub_n_err 2 
+isr_stub_n_err 3 
+isr_stub_n_err 4 
+isr_stub_n_err 5 
+isr_stub_n_err 6 
+isr_stub_n_err 7
+isr_stub_err 8 
+isr_stub_n_err 9 
+isr_stub_err 10 
+isr_stub_err 11 
+isr_stub_err 12 
+isr_stub_err 13 
+isr_stub_err 14
+isr_stub_n_err 15 
+isr_stub_n_err 16
+isr_stub_n_err 17 
+isr_stub_n_err 18 
+isr_stub_n_err 19
+isr_stub_n_err 20 
+isr_stub_n_err 21 
+isr_stub_n_err 22 
+isr_stub_n_err 23 
+isr_stub_n_err 24 
+isr_stub_n_err 25 
+isr_stub_n_err 26 
+isr_stub_n_err 27 
+isr_stub_n_err 28 
+isr_stub_n_err 29 
+isr_stub_n_err 30 
+isr_stub_n_err 31
+
+irq_0:
+  pusha 
+
+  push %ds 
+  push %es 
+  push %fs 
+  push %gs 
+  
+  mov $0x10, %ax 
+  mov %ax, %ds 
+  mov %ax, %es 
+  mov %ax, %fs 
+  mov %ax, %gs
+
+  mov %esp, %eax 
+  push %eax 
+
+  call timer_irq_handler
+
+  pop %eax 
+  pop %gs
+  pop %fs 
+  pop %es 
+  pop %ds
+
+  popa
+
   iret
 
+irq_1:
+  pusha 
+
+  push %ds 
+  push %es 
+  push %fs 
+  push %gs 
+  
+  mov $0x10, %ax 
+  mov %ax, %ds 
+  mov %ax, %es 
+  mov %ax, %fs 
+  mov %ax, %gs
+
+  mov %esp, %eax 
+  push %eax 
+
+  call keyboard_irq_handler
+
+  pop %eax 
+  pop %gs
+  pop %fs 
+  pop %es 
+  pop %ds
+
+  popa
+
+  iret
 
 .section .data
 .global isr_stub_table
@@ -102,5 +173,5 @@ isr_stub_table:
 .long isr_stub_29
 .long isr_stub_30
 .long isr_stub_31
-.long isr_stub_32
-.long isr_stub_33
+.long irq_0
+.long irq_1

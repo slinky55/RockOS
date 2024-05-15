@@ -1,42 +1,58 @@
 #include <stdint.h>
+#include <stdio.h>
 #include <arch/i386/gdt.h>
 
-static uint64_t gdt[3];
-
-static struct {
-  uint16_t limit;
-  uint32_t base;
-}__attribute__((packed)) gdt_ptr;
-
-uint64_t create_descriptor(uint32_t base, uint32_t limit, uint16_t flag)
+struct gdt_entry
 {
-    uint64_t descriptor;
- 
-    descriptor  =  limit       & 0x000F0000;         // set limit bits 19:16
-    descriptor |= (flag <<  8) & 0x00F0FF00;         // set type, p, dpl, s, g, d/b, l and avl fields
-    descriptor |= (base >> 16) & 0x000000FF;         // set base bits 23:16
-    descriptor |=  base        & 0xFF000000;         // set base bits 31:24
- 
-    descriptor <<= 32;
- 
-    descriptor |= base  << 16;                       // set base bits 15:0
-    descriptor |= limit  & 0x0000FFFF;               // set limit bits 15:0
- 
-    return descriptor;
+    uint16_t limit_low;
+    uint16_t base_low;
+    uint8_t base_middle;
+    uint8_t access;
+    uint8_t granularity;
+    uint8_t base_high;
+} __attribute__((packed));
+
+/* Special pointer which includes the limit: The max bytes
+*  taken up by the GDT, minus 1. Again, this NEEDS to be packed */
+struct gdt_ptr
+{
+    uint16_t limit;
+    uint32_t base;
+} __attribute__((packed));
+
+
+struct gdt_entry gdt[3];
+struct gdt_ptr gdt_ptr;
+
+extern void load_gdt();
+
+void gdt_set_gate(int num, unsigned long base, unsigned long limit, unsigned char access, unsigned char gran)
+{
+    /* Setup the descriptor base address */
+    gdt[num].base_low = (base & 0xFFFF);
+    gdt[num].base_middle = (base >> 16) & 0xFF;
+    gdt[num].base_high = (base >> 24) & 0xFF;
+
+    /* Setup the descriptor limits */
+    gdt[num].limit_low = (limit & 0xFFFF);
+    gdt[num].granularity = ((limit >> 16) & 0x0F);
+
+    /* Finally, set up the granularity and access flags */
+    gdt[num].granularity |= (gran & 0xF0);
+    gdt[num].access = access;
 }
 
 void init_gdt() {
     puts("loading gdt...");
 
-    gdt[0] = create_descriptor(0, 0, 0);
-    gdt[1] = create_descriptor(0, 0x000FFFFF, (GDT_CODE_PL0));
-    gdt[2] = create_descriptor(0, 0x000FFFFF, (GDT_DATA_PL0));
-
-    gdt_ptr.limit = sizeof(gdt) - 1;
+    gdt_ptr.limit = (sizeof(struct gdt_entry) * 3) - 1;
     gdt_ptr.base = (uint32_t)&gdt;
 
-    // Load the GDT using assembly
-    asm volatile("lgdt %0" : : "m"(gdt_ptr));
+    gdt_set_gate(0, 0, 0, 0, 0);
+    gdt_set_gate(1, 0, 0xFFFFFFFF, 0x9A, 0xCF);
+    gdt_set_gate(2, 0, 0xFFFFFFFF, 0x92, 0xCF);
+
+    load_gdt();
 
     puts("gdt done");
 }
