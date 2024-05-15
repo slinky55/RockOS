@@ -32,6 +32,8 @@ _start:
 
   call kernel_main
 
+  int $0x21
+
   cli
 1:	hlt
 	jmp 1b
@@ -57,3 +59,7 @@ flush_gdt:
   pop %eax
   ret
 
+.global load_idt 
+load_idt:
+  lidt [idtr]
+  ret

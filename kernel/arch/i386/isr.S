@@ -9,11 +9,16 @@ isr_stub_\num:
 
 .macro isr_stub_n_err num 
 isr_stub_\num:
-  cli
   push $0 
   push $\num
   jmp isr_common
 .endm
+
+.macro irq_stub num 
+irq_\num: 
+  push $0 
+  push $\num 
+  jmp irq_common
 
 .section .text
 isr_common:
@@ -33,7 +38,38 @@ isr_common:
   mov %esp, %eax 
   push %eax 
 
-  call default_isr_handler
+  call isr_handler
+
+  pop %eax 
+  pop %gs
+  pop %fs 
+  pop %es 
+  pop %ds
+
+  popa
+
+  add $0x08, %esp
+
+  iret
+
+irq_common:
+  pusha 
+
+  push %ds 
+  push %es 
+  push %fs 
+  push %gs 
+  
+  mov $0x10, %ax 
+  mov %ax, %ds 
+  mov %ax, %es 
+  mov %ax, %fs 
+  mov %ax, %gs
+
+  mov %esp, %eax 
+  push %eax 
+
+  call irq_handler
 
   pop %eax 
   pop %gs
@@ -81,6 +117,9 @@ isr_stub_n_err 30
 isr_stub_n_err 31
 
 irq_0:
+  push $0x00
+  push $0x00
+
   pusha 
 
   push %ds 
@@ -107,9 +146,14 @@ irq_0:
 
   popa
 
+  add $0x08, %esp
+
   iret
 
 irq_1:
+  push $0x00 
+  push $0x01
+
   pusha 
 
   push %ds 
@@ -135,6 +179,8 @@ irq_1:
   pop %ds
 
   popa
+
+  add $0x08, %esp
 
   iret
 
@@ -173,5 +219,8 @@ isr_stub_table:
 .long isr_stub_29
 .long isr_stub_30
 .long isr_stub_31
+
+.global irq_stub_table
+irq_stub_table:
 .long irq_0
 .long irq_1

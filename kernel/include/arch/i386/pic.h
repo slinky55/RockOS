@@ -3,10 +3,12 @@
 
 #define PIC_MASTER 0x20
 #define PIC_SLAVE  0xA0
+
 #define PIC_M_CMD  PIC_MASTER
-#define PIC_M_DATA (PIC_MASTER + 1)
+#define PIC_M_DATA 0x21
+
 #define PIC_S_CMD  PIC_SLAVE
-#define PIC_S_DATA (PIC_SLAVE + 1)
+#define PIC_S_DATA 0xA1
 
 #define PIC_EOI 0x20
 

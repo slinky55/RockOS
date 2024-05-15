@@ -10,6 +10,8 @@ idtr_t idtr;
 
 extern void* isr_stub_table[];
 
+extern void load_idt();
+
 unsigned char *exception_msgs[] =
 {
     "Division By Zero",
@@ -49,7 +51,7 @@ unsigned char *exception_msgs[] =
     "Reserved"
 };
 
-void default_isr_handler(isr_regs_t* regs) {
+void isr_handler(isr_regs_t* regs) {
   if (regs->int_no < 32) {
     puts("exception!!!");
     puts(exception_msgs[regs->int_no]);
@@ -80,10 +82,7 @@ void init_idt() {
     set_idt_desc(v, isr_stub_table[v], 0x8E); 
   }
 
-  set_idt_desc(0x20, isr_stub_table[0x20], 0x8E);
-  set_idt_desc(0x21, isr_stub_table[0x21], 0x8E);
-
-  __asm__ volatile ("lidt %0" : : "m"(idtr));
+  load_idt();
 
   puts("idt done...");
 }

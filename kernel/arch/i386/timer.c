@@ -13,6 +13,7 @@ void timer_phase(int hz)
 
 void init_pit() {
   puts("initializing pit...");
+  timer_phase(100);
   puts("pit done");
 }
 

@@ -30,8 +30,8 @@ void init_pic(uint8_t m_off, uint8_t s_off) {
   outb(PIC_S_DATA, ICW4_8086);
   io_wait();
 
-  m_mask = 0b00000000;
-  s_mask = 0b00000000;
+  m_mask = 0x00;
+  s_mask = 0x00;
 
   outb(PIC_M_DATA, m_mask);
   outb(PIC_S_DATA, s_mask);  
