@@ -1,21 +1,18 @@
-.global handle_keyboard
-
-.global default_exception_handler
-.type default_exception_handler, @function
-default_exception_handler:
-  cli
-  hlt 
+.global default_isr_handler
 
 .macro isr_err_stub num
 isr_stub_\num:
-  call default_exception_handler
+  pusha
+  call default_isr_handler
+  popa
   iret
 .endm
 
-
 .macro isr_no_err_stub num
 isr_stub_\num:
-  call default_exception_handler
+  pusha
+  call default_isr_handler
+  popa
   iret
 .endm
 
@@ -54,11 +51,15 @@ isr_err_stub    30
 isr_no_err_stub 31
 
 isr_stub_32:
-  call default_exception_handler
+  pusha
+  call default_isr_handler
+  popa
   iret 
 
 isr_stub_33:
-  call default_exception_handler
+  pusha
+  call keyboard_handler
+  popa
   iret
 
 

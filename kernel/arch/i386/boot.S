@@ -26,6 +26,8 @@ _start:
 
   cli
 
+  call terminal_initialize
+
   call init_gdt
 
   ljmp $0x08, $reload_seg
@@ -43,6 +45,8 @@ reload_seg:
   sti
 
   call kernel_main
+
+  int $0x21
 
   cli
 1:	hlt

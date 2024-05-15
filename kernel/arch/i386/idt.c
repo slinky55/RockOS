@@ -7,6 +7,14 @@ static idtr_t idtr;
 
 extern void* isr_stub_table[];
 
+void default_isr_handler() {
+  puts("isr handler...");
+}
+
+void keyboard_handler() {
+  puts("keyboard isr handler...");
+}
+
 void set_idt_desc(uint8_t _v, void* _isr, uint8_t _flags) {
   idt_entry_t* desc = &idt[_v];
 
@@ -18,13 +26,20 @@ void set_idt_desc(uint8_t _v, void* _isr, uint8_t _flags) {
 }
 
 void init_idt() {
-  idtr.base = (uint32_t)&idt[0];
-  idtr.limit = 2047;
+  puts("loading idt...");
 
-  // exceptions
+  idtr.base = (uint32_t)&idt[0];
+  idtr.limit = sizeof(idt) - 1;
+
+  // exceptions (0 - 31)
   for (uint8_t v = 0; v < 32; v++) {
     set_idt_desc(v, isr_stub_table[v], 0x8E); 
   }
 
+  set_idt_desc(0x20, isr_stub_table[0x20], 0x8E);
+  set_idt_desc(0x21, isr_stub_table[0x21], 0x8E);
+
   __asm__ volatile ("lidt %0" : : "m"(idtr));
+
+  puts("idt done...");
 }
