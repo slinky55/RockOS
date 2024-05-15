@@ -24,10 +24,27 @@ _start:
 
 	call _init
 
-	# Transfer control to the main kernel.
-	call kernel_main
+  cli
 
-	cli
+  call init_gdt
+
+  ljmp $0x08, $reload_seg
+
+reload_seg:
+  mov $0x10, %ax
+  mov %ax, %ds
+  mov %ax, %es 
+  mov %ax, %fs 
+  mov %ax, %gs 
+  mov %ax, %ss
+
+  call init_idt
+
+  sti
+
+  call kernel_main
+
+  cli
 1:	hlt
 	jmp 1b
 .size _start, . - _start
