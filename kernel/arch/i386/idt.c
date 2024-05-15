@@ -11,10 +11,6 @@ void default_isr_handler() {
   puts("isr handler...");
 }
 
-void keyboard_handler() {
-  puts("keyboard isr handler...");
-}
-
 void set_idt_desc(uint8_t _v, void* _isr, uint8_t _flags) {
   idt_entry_t* desc = &idt[_v];
 

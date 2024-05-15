@@ -53,12 +53,16 @@ isr_no_err_stub 31
 isr_stub_32:
   pusha
   call default_isr_handler
+  mov $0x20, %al
+  out %al, $0x20
   popa
   iret 
 
 isr_stub_33:
   pusha
-  call keyboard_handler
+  call handle_keyboard
+  mov $0x20, %al
+  out %al, $0x20
   popa
   iret
 

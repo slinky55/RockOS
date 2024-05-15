@@ -2,6 +2,8 @@
 #include <arch/i386/ports.h>
 
 void init_pic(uint8_t m_off, uint8_t s_off) {
+  puts("initializing pic...");
+
   uint8_t m_mask;
   uint8_t s_mask;
 
@@ -28,5 +30,15 @@ void init_pic(uint8_t m_off, uint8_t s_off) {
 
   outb(PIC_MASTER, m_mask);
   outb(PIC_SLAVE, s_mask);  
+
+  puts("pic done");
+}
+
+void pic_eoi(uint8_t irq)
+{
+	if(irq >= 8)
+		outb(PIC_SLAVE, PIC_EOI);
+ 
+	outb(PIC_MASTER, PIC_EOI);
 }
 

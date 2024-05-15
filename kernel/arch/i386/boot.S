@@ -44,9 +44,9 @@ reload_seg:
 
   sti
 
-  call kernel_main
+  call kernel_early
 
-  int $0x21
+  call kernel_main
 
   cli
 1:	hlt
