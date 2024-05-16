@@ -31,9 +31,7 @@ _start:
   sti
 
   call kernel_main
-
-  int $0x21
-
+  
   cli
 1:	hlt
 	jmp 1b

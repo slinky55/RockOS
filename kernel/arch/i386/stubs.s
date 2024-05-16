@@ -19,6 +19,7 @@ irq_\num:
   push $0 
   push $\num 
   jmp irq_common
+.endm
 
 .section .text
 isr_common:
@@ -116,73 +117,8 @@ isr_stub_n_err 29
 isr_stub_n_err 30 
 isr_stub_n_err 31
 
-irq_0:
-  push $0x00
-  push $0x00
-
-  pusha 
-
-  push %ds 
-  push %es 
-  push %fs 
-  push %gs 
-  
-  mov $0x10, %ax 
-  mov %ax, %ds 
-  mov %ax, %es 
-  mov %ax, %fs 
-  mov %ax, %gs
-
-  mov %esp, %eax 
-  push %eax 
-
-  call timer_irq_handler
-
-  pop %eax 
-  pop %gs
-  pop %fs 
-  pop %es 
-  pop %ds
-
-  popa
-
-  add $0x08, %esp
-
-  iret
-
-irq_1:
-  push $0x00 
-  push $0x01
-
-  pusha 
-
-  push %ds 
-  push %es 
-  push %fs 
-  push %gs 
-  
-  mov $0x10, %ax 
-  mov %ax, %ds 
-  mov %ax, %es 
-  mov %ax, %fs 
-  mov %ax, %gs
-
-  mov %esp, %eax 
-  push %eax 
-
-  call keyboard_irq_handler
-
-  pop %eax 
-  pop %gs
-  pop %fs 
-  pop %es 
-  pop %ds
-
-  popa
-
-  add $0x08, %esp
-
-  iret
+irq_stub 0 
+irq_stub 1
 
 .section .data
 .global isr_stub_table

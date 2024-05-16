@@ -13,9 +13,9 @@ void kernel_early() {
 
   init_gdt();
   init_idt();
+  init_irq();
 
   init_pic(0x20, 0x28);
-  init_irq();
 
   init_pit();
 }
