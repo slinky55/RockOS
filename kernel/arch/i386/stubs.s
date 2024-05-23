@@ -9,6 +9,7 @@ isr_stub_\num:
 
 .macro isr_stub_n_err num 
 isr_stub_\num:
+  cli
   push $0 
   push $\num
   jmp isr_common
@@ -16,6 +17,7 @@ isr_stub_\num:
 
 .macro irq_stub num 
 irq_\num: 
+  cli
   push $0 
   push $\num 
   jmp irq_common

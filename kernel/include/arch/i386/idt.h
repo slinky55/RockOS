@@ -20,4 +20,6 @@ typedef struct {
 
 void init_idt();
 
+void set_idt_descriptor(uint8_t, void*, uint8_t);
+
 #endif 

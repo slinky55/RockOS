@@ -3,6 +3,10 @@
 #include <stdio.h>
 #include <arch/i386/pic.h>
 
+#include <arch/i386/idt.h>
+
+#include <arch/i386/ports.h>
+
 extern void* irq_stub_table[];
 extern void set_idt_desc(uint8_t, void*, uint8_t);
 
@@ -19,18 +23,20 @@ void irq_handler(irq_regs_t* regs) {
 }
 
 int timer_ticks = 0;
+int seconds_running = 0;
 void timer_irq_handler(irq_regs_t* regs) {
   timer_ticks++;
 
-  if (timer_ticks % 18 == 0) {
-    puts("one second...");
+  if (timer_ticks % 100 == 0) {
+    seconds_running++;
   }
 
   pic_eoi(0);
 }
 
 void keyboard_irq_handler(irq_regs_t* regs) {
-  puts("keyboard event");
+  uint8_t scancode = inb(0x60);
+  putchar((unsigned char)scancode);
   pic_eoi(1);
 }
 
