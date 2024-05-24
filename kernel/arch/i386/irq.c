@@ -34,9 +34,20 @@ void timer_irq_handler(irq_regs_t* regs) {
   pic_eoi(0);
 }
 
+int brk = 0;
+extern char ps2_set_1[128];
 void keyboard_irq_handler(irq_regs_t* regs) {
+  if (brk == 1) {
+    brk = 0;
+    inb(0x60);
+    pic_eoi(1);
+    return;
+  } 
+
   uint8_t scancode = inb(0x60);
-  putchar((unsigned char)scancode);
+  if (scancode < 0x81) {
+    putchar(ps2_set_1[scancode]);
+  }
   pic_eoi(1);
 }
 

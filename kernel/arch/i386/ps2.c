@@ -89,7 +89,7 @@ void init_ps2_controller() {
   int isDual = (cfg & 0b00010000) == 0b00010000;
 
   // clear bits 0, 1
-  cfg = 0b00011100;
+  cfg = 0b01011100;
 
   if (isDual) {
     puts("found dual ps/2");
